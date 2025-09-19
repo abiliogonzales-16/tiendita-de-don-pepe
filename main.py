@@ -47,20 +47,27 @@ class App(CTk):
     def __init__(self):
         super().__init__()
         self.title("Tienda de Don Pepe")
-        self.geometry("700x500")
+        self.geometry("900x600")  
         self.resizable(False, False)
 
         # Tabla
-        self.tabla = ttk.Treeview(self, columns=("ID", "Nombre", "Precio", "Stock"), show="headings")
+        self.tabla = ttk.Treeview(self, columns=("ID", "Nombre", "Precio", "Stock"), show="headings", height=20)  
         for col in ("ID", "Nombre", "Precio", "Stock"):
             self.tabla.heading(col, text=col)
-            self.tabla.column(col, anchor="center")
+            if col == "ID":
+                self.tabla.column(col, anchor="center", width=80)
+            elif col == "Nombre":
+                self.tabla.column(col, anchor="center", width=250)
+            elif col == "Precio":
+                self.tabla.column(col, anchor="center", width=120)
+            elif col == "Stock":
+                self.tabla.column(col, anchor="center", width=120)  
         self.tabla.pack(pady=20, fill="x", padx=20)
 
         # Scrollbar
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tabla.yview)
         self.tabla.configure(yscroll=scrollbar.set)
-        scrollbar.place(x=670, y=60, height=210)
+        scrollbar.place(x=870, y=60, height=420)  
 
         # Botones principales
         btn_frame = CTkFrame(self)
@@ -95,30 +102,32 @@ class AgregarVentana(CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Agregar Producto")
-        self.geometry("300x250")
+        self.geometry("400x400")  
         self.parent = parent
+
+        self.grab_set()  # <-- Mantener ventana al frente
 
         self.nombre_var = StringVar()
         self.precio_var = StringVar()
         self.stock_var = StringVar()
 
-        CTkLabel(self, text="Nombre:").pack(pady=5)
+        CTkLabel(self, text="Nombre:").pack(pady=10)
         self.nombre_entry = CTkEntry(self, textvariable=self.nombre_var)
-        self.nombre_entry.pack(pady=5)
+        self.nombre_entry.pack(pady=10)
 
-        CTkLabel(self, text="Precio:").pack(pady=5)
+        CTkLabel(self, text="Precio:").pack(pady=10)
         self.precio_entry = CTkEntry(self, textvariable=self.precio_var)
-        self.precio_entry.pack(pady=5)
+        self.precio_entry.pack(pady=10)
 
-        CTkLabel(self, text="Stock:").pack(pady=5)
+        CTkLabel(self, text="Stock:").pack(pady=10)
         self.stock_entry = CTkEntry(self, textvariable=self.stock_var)
-        self.stock_entry.pack(pady=5)
+        self.stock_entry.pack(pady=10)
 
         btn_frame = CTkFrame(self)
-        btn_frame.pack(pady=10)
+        btn_frame.pack(pady=20)
 
-        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
-        CTkButton(btn_frame, text="Agregar", command=self.agregar_producto).grid(row=0, column=1, padx=5)
+        CTkButton(btn_frame, text="Cancelar", width=120, command=self.destroy).grid(row=0, column=0, padx=10)
+        CTkButton(btn_frame, text="Agregar", width=120, command=self.agregar_producto).grid(row=0, column=1, padx=10)
 
     def agregar_producto(self):
         nombre = self.nombre_var.get()
@@ -142,20 +151,22 @@ class EliminarVentana(CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("Eliminar Producto")
-        self.geometry("300x150")
+        self.geometry("400x200") 
         self.parent = parent
+
+        self.grab_set()  # <-- Mantener ventana al frente
 
         self.id_var = StringVar()
 
-        CTkLabel(self, text="ID del producto:").pack(pady=10)
+        CTkLabel(self, text="ID del producto:").pack(pady=20)
         self.id_entry = CTkEntry(self, textvariable=self.id_var)
-        self.id_entry.pack(pady=5)
+        self.id_entry.pack(pady=10)
 
         btn_frame = CTkFrame(self)
-        btn_frame.pack(pady=10)
+        btn_frame.pack(pady=20)
 
-        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
-        CTkButton(btn_frame, text="Eliminar", command=self.eliminar_producto).grid(row=0, column=1, padx=5)
+        CTkButton(btn_frame, text="Cancelar", width=120, command=self.destroy).grid(row=0, column=0, padx=10)
+        CTkButton(btn_frame, text="Eliminar", width=120, command=self.eliminar_producto).grid(row=0, column=1, padx=10)
 
     def eliminar_producto(self):
         id = self.id_var.get()
@@ -175,52 +186,53 @@ class ModificarVentana(CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
         self.title("¿Qué quieres modificar?")
-        self.geometry("300x200")
+        self.geometry("400x350")  
         self.parent = parent
 
-        CTkLabel(self, text="¿Qué quieres modificar?").pack(pady=10)
+        self.grab_set()  # <-- Mantener ventana al frente
 
-        CTkButton(self, text="Stock", command=self.modificar_stock).pack(pady=5)
-        CTkButton(self, text="Nombre", command=self.modificar_nombre).pack(pady=5)
-        CTkButton(self, text="Precio", command=self.modificar_precio).pack(pady=5)
-        CTkButton(self, text="Cancelar", command=self.destroy).pack(pady=5)
+        CTkLabel(self, text="¿Qué quieres modificar?").pack(pady=20)
+
+        CTkButton(self, text="Stock", width=120, command=self.modificar_stock).pack(pady=10)
+        CTkButton(self, text="Nombre", width=120, command=self.modificar_nombre).pack(pady=10)
+        CTkButton(self, text="Precio", width=120, command=self.modificar_precio).pack(pady=10)
+        CTkButton(self, text="Cancelar", width=120, command=self.destroy).pack(pady=10)
 
     def modificar_stock(self):
-        ModificarCampo(self, "Stock", "nuevo stock").grab_set()
-        self.destroy()
+        ModificarCampo(self, "Stock", "nuevo stock")
 
     def modificar_nombre(self):
-        ModificarCampo(self, "Nombre", "nuevo nombre").grab_set()
-        self.destroy()
+        ModificarCampo(self, "Nombre", "nuevo nombre")
 
     def modificar_precio(self):
-        ModificarCampo(self, "Precio", "nuevo precio").grab_set()
-        self.destroy()
+        ModificarCampo(self, "Precio", "nuevo precio")
 
 # Ventana para modificar un campo específico
 class ModificarCampo(CTkToplevel):
     def __init__(self, parent, campo, titulo):
         super().__init__(parent)
         self.title(f"Modificar {campo}")
-        self.geometry("300x200")
-        self.parent = parent.master  # para llamar a actualizar_tabla()
+        self.geometry("400x300")  
+        self.parent = parent.master   
+
+        self.grab_set()  # <-- Mantener ventana al frente
 
         self.id_var = StringVar()
         self.valor_var = StringVar()
 
-        CTkLabel(self, text=f"{titulo}:").pack(pady=10)
+        CTkLabel(self, text=f"{titulo}:").pack(pady=15)
         self.valor_entry = CTkEntry(self, textvariable=self.valor_var)
-        self.valor_entry.pack(pady=5)
+        self.valor_entry.pack(pady=10)
 
-        CTkLabel(self, text="ID del producto a modificar:").pack(pady=10)
+        CTkLabel(self, text="ID del producto a modificar:").pack(pady=15)
         self.id_entry = CTkEntry(self, textvariable=self.id_var)
-        self.id_entry.pack(pady=5)
+        self.id_entry.pack(pady=10)
 
         btn_frame = CTkFrame(self)
-        btn_frame.pack(pady=10)
+        btn_frame.pack(pady=30)  
 
-        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
-        CTkButton(btn_frame, text="OK", command=self.modificar_valor).grid(row=0, column=1, padx=5)
+        CTkButton(btn_frame, text="Cancelar", width=120, command=self.destroy).grid(row=0, column=0, padx=10)
+        CTkButton(btn_frame, text="OK", width=120, command=self.modificar_valor).grid(row=0, column=1, padx=10)
 
         self.campo = campo
 
@@ -246,7 +258,7 @@ class ModificarCampo(CTkToplevel):
             messagebox.showwarning("Campos incompletos", "Complete todos los campos.")
 
 if __name__ == "__main__":
-    # Crear tabla si no existe (como en tu código original)
+    # Crear tabla si no existe 
     loco = sqlite3.connect("elChino.db")
     cur = loco.cursor()
     cur.execute("""
@@ -262,15 +274,3 @@ if __name__ == "__main__":
 
     app = App()
     app.mainloop()
-
-
-
-
-
-
-
-
-
-
-
-
