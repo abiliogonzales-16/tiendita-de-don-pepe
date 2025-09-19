@@ -105,7 +105,7 @@ class AgregarVentana(CTkToplevel):
         self.geometry("400x400")  
         self.parent = parent
 
-        self.grab_set()  # <-- Mantener ventana al frente
+        self.grab_set() 
 
         self.nombre_var = StringVar()
         self.precio_var = StringVar()
@@ -154,7 +154,7 @@ class EliminarVentana(CTkToplevel):
         self.geometry("400x200") 
         self.parent = parent
 
-        self.grab_set()  # <-- Mantener ventana al frente
+        self.grab_set()  
 
         self.id_var = StringVar()
 
@@ -189,7 +189,7 @@ class ModificarVentana(CTkToplevel):
         self.geometry("400x350")  
         self.parent = parent
 
-        self.grab_set()  # <-- Mantener ventana al frente
+        self.grab_set()  
 
         CTkLabel(self, text="¿Qué quieres modificar?").pack(pady=20)
 
@@ -215,7 +215,7 @@ class ModificarCampo(CTkToplevel):
         self.geometry("400x300")  
         self.parent = parent.master   
 
-        self.grab_set()  # <-- Mantener ventana al frente
+        self.grab_set() 
 
         self.id_var = StringVar()
         self.valor_var = StringVar()
