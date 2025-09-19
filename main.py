@@ -1,25 +1,8 @@
 from customtkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sqlite3
 
-# Conectar o crear la base de datos
-loco = sqlite3.connect("elChino.db")
-cur = loco.cursor()
-
-# Crear tabla de productos
-cur.execute("""
-CREATE TABLE IF NOT EXISTS productos (
- id INTEGER PRIMARY KEY AUTOINCREMENT,
- nombre TEXT NOT NULL,
- precio REAL NOT NULL,
- stock INTEGER NOT NULL
-)
-""")
-
-loco.commit()
-loco.close()
-print("Base de datos lista")
-
+# Base de datos
 def obtener():
     loco = sqlite3.connect("elChino.db")
     cr = loco.cursor()
@@ -42,127 +25,252 @@ def eliminar(id):
     loco.commit()
     loco.close()
 
-def actualizar(id, nombre, precio, stock):
+def actualizar(id, nombre=None, precio=None, stock=None):
     loco = sqlite3.connect("elChino.db")
     cr = loco.cursor()
-    cr.execute("UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?", (nombre, precio, stock, id))
+    if nombre is not None and precio is not None and stock is not None:
+        cr.execute("UPDATE productos SET nombre = ?, precio = ?, stock = ? WHERE id = ?", (nombre, precio, stock, id))
+    elif nombre is not None:
+        cr.execute("UPDATE productos SET nombre = ? WHERE id = ?", (nombre, id))
+    elif precio is not None:
+        cr.execute("UPDATE productos SET precio = ? WHERE id = ?", (precio, id))
+    elif stock is not None:
+        cr.execute("UPDATE productos SET stock = ? WHERE id = ?", (stock, id))
     loco.commit()
     loco.close()
-print("Base de datos lista")
 
-#Establece el modo oscuro para la interfaz
+# Configuración inicial
 set_appearance_mode("dark")
-#Establece el tema de color azul oscuro para la interfaz
 set_default_color_theme("dark-blue")
 
-app = CTk()
-app.geometry("700x500")
-app.title("Gestor de Productos")
-app.resizable(False, False)
-# app.iconbitmap("icono.ico")  # Comentado para evitar error si no existe el archivo
-app.config(bg="#1a1a1a")
-app.eval('tk::PlaceWindow . center')
-app.grid_columnconfigure((0, 1, 2, 3), weight=1)
-app.grid_rowconfigure((0, 1, 2, 3, 4, 5), weight=1)
-#Variables globales
-nombre_var = StringVar()
-precio_var = StringVar()
-stock_var = StringVar()
-id_var = StringVar()
-#Funciones
-def agregar_producto():
-    nombre = nombre_var.get()
-    precio = precio_var.get()
-    stock = stock_var.get()
-    if nombre and precio and stock:
-        try:
-            precio = float(precio)
-            stock = int(stock)
-            agregar(nombre, precio, stock)
-            nombre_var.set("")
-            precio_var.set("")
-            stock_var.set("")
-            actualizar_tabla()
-        except ValueError:
-            print("Precio debe ser un número y Stock debe ser un entero")
-    else:
-        print("Todos los campos son obligatorios")
-def eliminar_producto():
-    id = id_var.get()
-    if id:
-        try:
-            id = int(id)
-            eliminar(id)
-            id_var.set("")
-            actualizar_tabla()
-        except ValueError:
-            print("ID debe ser un número entero")
-    else:
-        print("El campo ID es obligatorio")
-def actualizar_producto():
-    id = id_var.get()
-    nombre = nombre_var.get()
-    precio = precio_var.get()
-    stock = stock_var.get()
-    if id and nombre and precio and stock:
-        try:
-            id = int(id)
-            precio = float(precio)
-            stock = int(stock)
-            actualizar(id, nombre, precio, stock)
-            id_var.set("")
-            nombre_var.set("")
-            precio_var.set("")
-            stock_var.set("")
-            actualizar_tabla()
-        except ValueError:
-            print("ID debe ser un entero, Precio debe ser un número y Stock debe ser un entero")
-    else:
-        print("Todos los campos son obligatorios")
-def actualizar_tabla():
-    for row in tabla.get_children():
-        tabla.delete(row)
-    productos = obtener()
-    for producto in productos:
-        tabla.insert("", "end", values=producto)
-#Widgets
-#Etiquetas
-titulo = CTkLabel(app, text="Gestor de Productos", font=("Arial", 20))
-titulo.grid(row=0, column=0, columnspan=4, pady=10)
-nombre_label = CTkLabel(app, text="Nombre:")
-nombre_label.grid(row=1, column=0, padx=10, pady=5, sticky="e")
-precio_label = CTkLabel(app, text="Precio:")
-precio_label.grid(row=2, column=0, padx=10, pady=5, sticky="e")
-stock_label = CTkLabel(app, text="Stock:")
-stock_label.grid(row=3, column=0, padx=10, pady=5, sticky="e")
-id_label = CTkLabel(app, text="ID:")
-id_label.grid(row=4, column=0, padx=10, pady=5, sticky="e")
-#Entradas
-nombre_entry = CTkEntry(app, textvariable=nombre_var)
-nombre_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
-precio_entry = CTkEntry(app, textvariable=precio_var)
-precio_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
-stock_entry = CTkEntry(app, textvariable=stock_var)
-stock_entry.grid(row=3, column=1, padx=10, pady=5, sticky="w")
-id_entry = CTkEntry(app, textvariable=id_var)
-id_entry.grid(row=4, column=1, padx=10, pady=5, sticky="w")
-#Botones
-agregar_btn = CTkButton(app, text="Agregar", command=agregar_producto)
-agregar_btn.grid(row=1, column=2, padx=10, pady=5)
-eliminar_btn = CTkButton(app, text="Eliminar", command=eliminar_producto)
-eliminar_btn.grid(row=4, column=2, padx=10, pady=5)
-actualizar_btn = CTkButton(app, text="Actualizar", command=actualizar_producto)
-actualizar_btn.grid(row=4, column=3, padx=10, pady=5)
-#Tabla
-tabla = ttk.Treeview(app, columns=("ID", "Nombre", "Precio", "Stock"), show="headings")
-tabla.heading("ID", text="ID")
-tabla.heading("Nombre", text="Nombre")
-tabla.heading("Precio", text="Precio")
-tabla.heading("Stock", text="Stock")
-tabla.grid(row=5, column=0, columnspan=4, padx=10, pady=10, sticky="nsew")
-#Scrollbar
-scrollbar = ttk.Scrollbar(app, orient="vertical", command=tabla.yview)
-tabla.configure(yscroll=scrollbar.set)
-scrollbar.grid(row=5, column=4, sticky="ns")
-actualizar_tabla()
-app.mainloop()
+class App(CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Tienda de Don Pepe")
+        self.geometry("700x500")
+        self.resizable(False, False)
+
+        # Tabla
+        self.tabla = ttk.Treeview(self, columns=("ID", "Nombre", "Precio", "Stock"), show="headings")
+        for col in ("ID", "Nombre", "Precio", "Stock"):
+            self.tabla.heading(col, text=col)
+            self.tabla.column(col, anchor="center")
+        self.tabla.pack(pady=20, fill="x", padx=20)
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(self, orient="vertical", command=self.tabla.yview)
+        self.tabla.configure(yscroll=scrollbar.set)
+        scrollbar.place(x=670, y=60, height=210)
+
+        # Botones principales
+        btn_frame = CTkFrame(self)
+        btn_frame.pack(pady=10)
+
+        btn_agregar = CTkButton(btn_frame, text="Agregar", width=100, command=self.open_agregar)
+        btn_agregar.grid(row=0, column=0, padx=5)
+        btn_eliminar = CTkButton(btn_frame, text="Eliminar", width=100, command=self.open_eliminar)
+        btn_eliminar.grid(row=0, column=1, padx=5)
+        btn_modificar = CTkButton(btn_frame, text="Modificar", width=100, command=self.open_modificar)
+        btn_modificar.grid(row=0, column=2, padx=5)
+
+        self.actualizar_tabla()
+
+    def actualizar_tabla(self):
+        for row in self.tabla.get_children():
+            self.tabla.delete(row)
+        for producto in obtener():
+            self.tabla.insert("", "end", values=producto)
+
+    def open_agregar(self):
+        AgregarVentana(self)
+
+    def open_eliminar(self):
+        EliminarVentana(self)
+
+    def open_modificar(self):
+        ModificarVentana(self)
+
+# Ventana Agregar
+class AgregarVentana(CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Agregar Producto")
+        self.geometry("300x250")
+        self.parent = parent
+
+        self.nombre_var = StringVar()
+        self.precio_var = StringVar()
+        self.stock_var = StringVar()
+
+        CTkLabel(self, text="Nombre:").pack(pady=5)
+        self.nombre_entry = CTkEntry(self, textvariable=self.nombre_var)
+        self.nombre_entry.pack(pady=5)
+
+        CTkLabel(self, text="Precio:").pack(pady=5)
+        self.precio_entry = CTkEntry(self, textvariable=self.precio_var)
+        self.precio_entry.pack(pady=5)
+
+        CTkLabel(self, text="Stock:").pack(pady=5)
+        self.stock_entry = CTkEntry(self, textvariable=self.stock_var)
+        self.stock_entry.pack(pady=5)
+
+        btn_frame = CTkFrame(self)
+        btn_frame.pack(pady=10)
+
+        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
+        CTkButton(btn_frame, text="Agregar", command=self.agregar_producto).grid(row=0, column=1, padx=5)
+
+    def agregar_producto(self):
+        nombre = self.nombre_var.get()
+        precio = self.precio_var.get()
+        stock = self.stock_var.get()
+
+        if nombre and precio and stock:
+            try:
+                precio = float(precio)
+                stock = int(stock)
+                agregar(nombre, precio, stock)
+                self.parent.actualizar_tabla()
+                self.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Precio debe ser un número y Stock un entero.")
+        else:
+            messagebox.showwarning("Campos incompletos", "Complete todos los campos.")
+
+# Ventana Eliminar
+class EliminarVentana(CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Eliminar Producto")
+        self.geometry("300x150")
+        self.parent = parent
+
+        self.id_var = StringVar()
+
+        CTkLabel(self, text="ID del producto:").pack(pady=10)
+        self.id_entry = CTkEntry(self, textvariable=self.id_var)
+        self.id_entry.pack(pady=5)
+
+        btn_frame = CTkFrame(self)
+        btn_frame.pack(pady=10)
+
+        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
+        CTkButton(btn_frame, text="Eliminar", command=self.eliminar_producto).grid(row=0, column=1, padx=5)
+
+    def eliminar_producto(self):
+        id = self.id_var.get()
+        if id:
+            try:
+                id = int(id)
+                eliminar(id)
+                self.parent.actualizar_tabla()
+                self.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "ID debe ser un número entero.")
+        else:
+            messagebox.showwarning("Campo vacío", "Ingrese el ID del producto.")
+
+# Ventana Modificar (elige qué campo modificar)
+class ModificarVentana(CTkToplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("¿Qué quieres modificar?")
+        self.geometry("300x200")
+        self.parent = parent
+
+        CTkLabel(self, text="¿Qué quieres modificar?").pack(pady=10)
+
+        CTkButton(self, text="Stock", command=self.modificar_stock).pack(pady=5)
+        CTkButton(self, text="Nombre", command=self.modificar_nombre).pack(pady=5)
+        CTkButton(self, text="Precio", command=self.modificar_precio).pack(pady=5)
+        CTkButton(self, text="Cancelar", command=self.destroy).pack(pady=5)
+
+    def modificar_stock(self):
+        ModificarCampo(self, "Stock", "nuevo stock").grab_set()
+        self.destroy()
+
+    def modificar_nombre(self):
+        ModificarCampo(self, "Nombre", "nuevo nombre").grab_set()
+        self.destroy()
+
+    def modificar_precio(self):
+        ModificarCampo(self, "Precio", "nuevo precio").grab_set()
+        self.destroy()
+
+# Ventana para modificar un campo específico
+class ModificarCampo(CTkToplevel):
+    def __init__(self, parent, campo, titulo):
+        super().__init__(parent)
+        self.title(f"Modificar {campo}")
+        self.geometry("300x200")
+        self.parent = parent.master  # para llamar a actualizar_tabla()
+
+        self.id_var = StringVar()
+        self.valor_var = StringVar()
+
+        CTkLabel(self, text=f"{titulo}:").pack(pady=10)
+        self.valor_entry = CTkEntry(self, textvariable=self.valor_var)
+        self.valor_entry.pack(pady=5)
+
+        CTkLabel(self, text="ID del producto a modificar:").pack(pady=10)
+        self.id_entry = CTkEntry(self, textvariable=self.id_var)
+        self.id_entry.pack(pady=5)
+
+        btn_frame = CTkFrame(self)
+        btn_frame.pack(pady=10)
+
+        CTkButton(btn_frame, text="Cancelar", command=self.destroy).grid(row=0, column=0, padx=5)
+        CTkButton(btn_frame, text="OK", command=self.modificar_valor).grid(row=0, column=1, padx=5)
+
+        self.campo = campo
+
+    def modificar_valor(self):
+        valor = self.valor_var.get()
+        id = self.id_var.get()
+        if valor and id:
+            try:
+                id = int(id)
+                if self.campo == "Stock":
+                    valor = int(valor)
+                    actualizar(id, stock=valor)
+                elif self.campo == "Precio":
+                    valor = float(valor)
+                    actualizar(id, precio=valor)
+                elif self.campo == "Nombre":
+                    actualizar(id, nombre=valor)
+                self.parent.actualizar_tabla()
+                self.destroy()
+            except ValueError:
+                messagebox.showerror("Error", "Verifica que los valores sean correctos.")
+        else:
+            messagebox.showwarning("Campos incompletos", "Complete todos los campos.")
+
+if __name__ == "__main__":
+    # Crear tabla si no existe (como en tu código original)
+    loco = sqlite3.connect("elChino.db")
+    cur = loco.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS productos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nombre TEXT NOT NULL,
+        precio REAL NOT NULL,
+        stock INTEGER NOT NULL
+    )
+    """)
+    loco.commit()
+    loco.close()
+
+    app = App()
+    app.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
