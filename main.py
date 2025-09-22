@@ -142,9 +142,9 @@ class AgregarVentana(CTkToplevel):
                 self.parent.actualizar_tabla()
                 self.destroy()
             except ValueError:
-                messagebox.showerror("Error", "Precio debe ser un número y Stock un entero.")
+                messagebox.showerror("Error", "Precio debe ser un número y Stock un entero por favor.")
         else:
-            messagebox.showwarning("Campos incompletos", "Complete todos los campos.")
+            messagebox.showwarning("Campos incompletos", "Complete todos los campos por favor.")
 
 # Ventana Eliminar
 class EliminarVentana(CTkToplevel):
@@ -177,9 +177,9 @@ class EliminarVentana(CTkToplevel):
                 self.parent.actualizar_tabla()
                 self.destroy()
             except ValueError:
-                messagebox.showerror("Error", "ID debe ser un número entero.")
+                messagebox.showerror("Error", "ID debe ser un número entero porfavor.")
         else:
-            messagebox.showwarning("Campo vacío", "Ingrese el ID del producto.")
+            messagebox.showwarning("Campo vacío", "Ingrese el ID del producto por favor.")
 
 # Ventana Modificar (elige qué campo modificar)
 class ModificarVentana(CTkToplevel):
@@ -257,6 +257,34 @@ class ModificarCampo(CTkToplevel):
         else:
             messagebox.showwarning("Campos incompletos", "Complete todos los campos.")
 
+# Ventana de Login
+class LoginVentana(CTk):
+    def __init__(self):
+        super().__init__()
+        self.title("Inicio de sesión")
+        self.geometry("400x300")
+        self.resizable(False, False)
+
+        CTkLabel(self, text="Usuario:").pack(pady=10)
+        self.usuario_var = StringVar()
+        CTkEntry(self, textvariable=self.usuario_var).pack(pady=10)
+
+        CTkLabel(self, text="Contraseña:").pack(pady=10)
+        self.contra_var = StringVar()
+        CTkEntry(self, textvariable=self.contra_var, show="*").pack(pady=10)
+
+        CTkButton(self, text="Ingresar", command=self.verificar).pack(pady=20)
+
+    def verificar(self):
+        usuario = self.usuario_var.get()
+        contra = self.contra_var.get()
+        if usuario == "pepe" and contra == "1234":
+            self.destroy()
+            app = App()
+            app.mainloop()
+        else:
+            messagebox.showerror("Error", "Usuario o contraseña incorrectos.")
+
 if __name__ == "__main__":
     # Crear tabla si no existe 
     loco = sqlite3.connect("elChino.db")
@@ -272,5 +300,5 @@ if __name__ == "__main__":
     loco.commit()
     loco.close()
 
-    app = App()
-    app.mainloop()
+    login = LoginVentana()
+    login.mainloop()
